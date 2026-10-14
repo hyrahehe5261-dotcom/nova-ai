@@ -1,0 +1,1273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Nova AI</title>
+
+<style>
+*{box-sizing:border-box}
+
+html,body{
+  margin:0;
+  width:100%;
+  height:100%;
+  background:#000;
+  color:#fff;
+  font-family:Inter,Arial,sans-serif;
+}
+
+body{
+  overflow:hidden;
+}
+
+button,textarea{
+  font:inherit;
+}
+
+.app{
+  display:flex;
+  width:100%;
+  height:100vh;
+  background:#000;
+}
+
+/* SIDEBAR */
+
+.sidebar{
+  width:260px;
+  height:100vh;
+  background:#090909;
+  border-right:1px solid #222;
+  padding:14px;
+  display:flex;
+  flex-direction:column;
+  flex-shrink:0;
+}
+
+.logo{
+  font-size:21px;
+  font-weight:800;
+  padding:10px 10px 18px;
+  letter-spacing:-.5px;
+}
+
+.new-chat{
+  width:100%;
+  padding:12px;
+  border-radius:10px;
+  border:1px solid #333;
+  background:#151515;
+  color:#fff;
+  cursor:pointer;
+  text-align:left;
+  font-weight:600;
+  transition:.15s;
+}
+
+.new-chat:hover{
+  background:#222;
+}
+
+.chats{
+  flex:1;
+  overflow-y:auto;
+  margin-top:14px;
+}
+
+.chat-item{
+  padding:11px;
+  margin-bottom:3px;
+  border-radius:9px;
+  color:#ccc;
+  cursor:pointer;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  font-size:14px;
+}
+
+.chat-item:hover{
+  background:#181818;
+}
+
+.chat-item.active{
+  background:#202020;
+  color:#fff;
+}
+
+/* MAIN */
+
+.main{
+  flex:1;
+  min-width:0;
+  height:100vh;
+  display:flex;
+  flex-direction:column;
+  background:#000;
+}
+
+.topbar{
+  height:58px;
+  flex-shrink:0;
+  display:flex;
+  align-items:center;
+  padding:0 20px;
+  border-bottom:1px solid #1d1d1d;
+  background:#050505;
+  font-weight:700;
+}
+
+.mobile-menu{
+  display:none;
+}
+
+/* MESSAGES */
+
+.messages{
+  flex:1;
+  overflow-y:auto;
+  padding:30px 20px 160px;
+  scroll-behavior:smooth;
+}
+
+.message{
+  max-width:850px;
+  margin:0 auto 30px;
+}
+
+.role{
+  font-size:13px;
+  font-weight:800;
+  margin-bottom:8px;
+}
+
+.user .role{
+  color:#fff;
+}
+
+.assistant .role{
+  color:#888;
+}
+
+.content{
+  color:#eee;
+  font-size:15.5px;
+  line-height:1.65;
+  white-space:pre-wrap;
+  overflow-wrap:anywhere;
+}
+
+.empty{
+  height:100%;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  padding-bottom:100px;
+}
+
+.empty h1{
+  margin:0 0 9px;
+  font-size:36px;
+  letter-spacing:-1.2px;
+}
+
+.empty p{
+  margin:0;
+  color:#777;
+}
+
+/* CODE */
+
+.code-wrap{
+  margin:14px 0;
+  overflow:hidden;
+  border:1px solid #303030;
+  border-radius:10px;
+  background:#101010;
+}
+
+.code-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:8px 11px;
+  background:#191919;
+  color:#888;
+  font-size:12px;
+}
+
+.copy{
+  border:0;
+  border-radius:6px;
+  padding:5px 10px;
+  background:#292929;
+  color:#fff;
+  cursor:pointer;
+  font-size:12px;
+}
+
+.copy:hover{
+  background:#3a3a3a;
+}
+
+pre{
+  margin:0;
+  padding:15px;
+  overflow-x:auto;
+  color:#eee;
+  font-family:Consolas,Monaco,monospace;
+  font-size:13px;
+  line-height:1.55;
+}
+
+/* COMPOSER */
+
+.composer-area{
+  position:fixed;
+  left:260px;
+  right:0;
+  bottom:0;
+  padding:15px 20px 20px;
+  background:linear-gradient(
+    transparent,
+    rgba(0,0,0,.94) 25%
+  );
+}
+
+.composer{
+  max-width:850px;
+  margin:auto;
+  display:flex;
+  align-items:flex-end;
+  gap:9px;
+  padding:10px;
+  border:1px solid #333;
+  border-radius:16px;
+  background:#111;
+  box-shadow:0 5px 30px rgba(0,0,0,.5);
+}
+
+textarea{
+  flex:1;
+  min-height:28px;
+  max-height:180px;
+  resize:none;
+  outline:none;
+  border:0;
+  padding:6px 7px;
+  background:transparent;
+  color:#fff;
+  line-height:1.45;
+}
+
+textarea::placeholder{
+  color:#666;
+}
+
+.send{
+  width:39px;
+  height:39px;
+  flex-shrink:0;
+  border:0;
+  border-radius:10px;
+  background:#fff;
+  color:#000;
+  cursor:pointer;
+  font-size:19px;
+  font-weight:bold;
+}
+
+.send:hover{
+  background:#ddd;
+}
+
+.send:disabled{
+  opacity:.4;
+  cursor:default;
+}
+
+.status{
+  max-width:850px;
+  margin:6px auto 0;
+  text-align:center;
+  color:#555;
+  font-size:11px;
+}
+
+/* MOBILE */
+
+@media(max-width:700px){
+
+  .sidebar{
+    position:fixed;
+    z-index:50;
+    left:-270px;
+    top:0;
+    bottom:0;
+    transition:left .2s;
+  }
+
+  .sidebar.open{
+    left:0;
+  }
+
+  .mobile-menu{
+    display:block;
+    margin-right:12px;
+    border:0;
+    background:transparent;
+    color:#fff;
+    font-size:21px;
+    cursor:pointer;
+  }
+
+  .composer-area{
+    left:0;
+  }
+
+  .messages{
+    padding-left:13px;
+    padding-right:13px;
+  }
+
+  .empty h1{
+    font-size:28px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+  <aside class="sidebar" id="sidebar">
+
+    <div class="logo">
+      ✦ Nova AI
+    </div>
+
+    <button class="new-chat" id="newChat">
+      ＋ New chat
+    </button>
+
+    <div class="chats" id="chatList"></div>
+
+  </aside>
+
+  <main class="main">
+
+    <div class="topbar">
+      <button class="mobile-menu" id="mobileMenu">☰</button>
+      Nova AI
+    </div>
+
+    <div class="messages" id="messages"></div>
+
+  </main>
+
+</div>
+
+<div class="composer-area">
+
+  <div class="composer">
+
+    <input
+      type="file"
+      id="fileInput"
+      accept="image/*,.txt,.json,.csv,.md,.js,.html,.css,.py"
+      multiple
+      hidden
+    >
+
+    <button
+      class="attach"
+      id="attach"
+      type="button"
+      title="Attach files"
+    >📎</button>
+
+    <textarea
+      id="input"
+      rows="1"
+      placeholder="Message Nova AI..."
+      autocomplete="off"
+    ></textarea>
+
+    <button class="send" id="send">↑</button>
+
+  </div>
+
+  <div class="status" id="status">
+    Nova AI
+  </div>
+
+</div>
+
+<script>
+
+"use strict";
+
+/* =========================
+   STATE
+========================= */
+
+let chats =
+  JSON.parse(
+    localStorage.getItem("nova_chats") || "[]"
+  );
+
+let currentChatId = null;
+let busy = false;
+
+/* =========================
+   ELEMENTS
+========================= */
+
+const messagesEl =
+  document.getElementById("messages");
+
+const inputEl =
+  document.getElementById("input");
+
+const sendEl =
+  document.getElementById("send");
+
+const chatListEl =
+  document.getElementById("chatList");
+
+const newChatEl =
+  document.getElementById("newChat");
+
+const fileInput =
+  document.getElementById("fileInput");
+
+const attachEl =
+  document.getElementById("attach");
+
+let pendingFiles = [];
+
+attachEl.addEventListener("click", () => {
+  fileInput.click();
+});
+
+fileInput.addEventListener("change", () => {
+  pendingFiles = Array.from(fileInput.files || []);
+  updateAttachmentStatus();
+});
+
+function updateAttachmentStatus(){
+
+  if(!pendingFiles.length){
+    statusEl.textContent = "Nova AI";
+    return;
+  }
+
+  statusEl.textContent =
+    pendingFiles.length +
+    (pendingFiles.length === 1 ? " file attached" : " files attached");
+}
+
+inputEl.addEventListener("paste", event => {
+
+  const files = Array.from(
+    event.clipboardData?.files || []
+  );
+
+  const images = files.filter(
+    file => file.type.startsWith("image/")
+  );
+
+  if(images.length){
+    pendingFiles.push(...images);
+    updateAttachmentStatus();
+  }
+});
+
+newChatEl.addEventListener("click", () => {
+
+  const chat = {
+    id: Date.now().toString(),
+    title: "New chat",
+    messages: []
+  };
+
+  chats.unshift(chat);
+  currentChatId = chat.id;
+
+  renderChatList();
+  renderMessages();
+
+  saveChats();
+
+  inputEl.value = "";
+  inputEl.style.height = "auto";
+  inputEl.focus();
+
+  statusEl.textContent = "Nova AI";
+});
+
+const statusEl =
+  document.getElementById("status");
+
+const sidebarEl =
+  document.getElementById("sidebar");
+
+const mobileMenuEl =
+  document.getElementById("mobileMenu");
+
+/* =========================
+   STORAGE
+========================= */
+
+function saveChats(){
+  localStorage.setItem(
+    "nova_chats",
+    JSON.stringify(chats)
+  );
+}
+
+/* =========================
+   CHAT
+========================= */
+
+function createChat(){
+
+  const chat = {
+    id:Date.now().toString(),
+    title:"New chat",
+    messages:[]
+  };
+
+  chats.unshift(chat);
+
+  currentChatId =
+    chat.id;
+
+  saveChats();
+
+  renderChatList();
+  renderMessages();
+}
+
+function getCurrentChat(){
+
+  return chats.find(
+    c => c.id === currentChatId
+  );
+}
+
+function ensureChat(){
+
+  if(
+    !currentChatId ||
+    !getCurrentChat()
+  ){
+    createChat();
+  }
+}
+
+/* =========================
+   CHAT LIST
+========================= */
+
+function renderChatList(){
+
+  chatListEl.innerHTML = "";
+
+  chats.forEach(chat => {
+
+    const item =
+      document.createElement("div");
+
+    item.className =
+      "chat-item" +
+      (
+        chat.id === currentChatId
+        ? " active"
+        : ""
+      );
+
+    const title =
+      document.createElement("span");
+
+    title.textContent =
+      chat.title || "New chat";
+
+    title.style.flex = "1";
+    title.style.minWidth = "0";
+    title.style.overflow = "hidden";
+    title.style.textOverflow = "ellipsis";
+    title.style.whiteSpace = "nowrap";
+
+    const deleteBtn =
+      document.createElement("button");
+
+    deleteBtn.type = "button";
+    deleteBtn.textContent = "✕";
+    deleteBtn.title = "Delete chat";
+
+    deleteBtn.style.border = "0";
+    deleteBtn.style.background = "transparent";
+    deleteBtn.style.color = "#888";
+    deleteBtn.style.cursor = "pointer";
+    deleteBtn.style.fontSize = "15px";
+    deleteBtn.style.padding = "4px 6px";
+    deleteBtn.style.marginLeft = "8px";
+    deleteBtn.style.flexShrink = "0";
+
+    deleteBtn.addEventListener("mouseenter", () => {
+      deleteBtn.style.color = "#fff";
+    });
+
+    deleteBtn.addEventListener("mouseleave", () => {
+      deleteBtn.style.color = "#888";
+    });
+
+    deleteBtn.onclick = event => {
+
+      event.stopPropagation();
+
+      chats =
+        chats.filter(
+          c => c.id !== chat.id
+        );
+
+      if(currentChatId === chat.id){
+
+        if(chats.length){
+
+          currentChatId =
+            chats[0].id;
+
+        }else{
+
+          createChat();
+
+          saveChats();
+          renderChatList();
+          renderMessages();
+
+          return;
+        }
+      }
+
+      saveChats();
+      renderChatList();
+      renderMessages();
+    };
+
+    item.appendChild(title);
+    item.appendChild(deleteBtn);
+
+    item.onclick = () => {
+
+      currentChatId =
+        chat.id;
+
+      renderChatList();
+      renderMessages();
+
+      sidebarEl.classList.remove(
+        "open"
+      );
+    };
+
+    chatListEl.appendChild(item);
+  });
+}
+
+/* =========================
+   HTML ESCAPE
+========================= */
+
+function escapeHTML(text){
+
+  return text
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;");
+}
+
+/* =========================
+   CODE BLOCKS
+========================= */
+
+function renderContent(text){
+
+  const parts =
+    text.split(/```/g);
+
+  let html = "";
+
+  for(
+    let i = 0;
+    i < parts.length;
+    i++
+  ){
+
+    if(i % 2 === 1){
+
+      let code = parts[i];
+
+      let language = "code";
+
+      const newline =
+        code.indexOf("\n");
+
+      if(newline !== -1){
+
+        const first =
+          code.slice(
+            0,
+            newline
+          ).trim();
+
+        if(
+          /^[a-zA-Z0-9+#_-]+$/.test(
+            first
+          )
+        ){
+
+          language = first;
+
+          code =
+            code.slice(
+              newline + 1
+            );
+        }
+      }
+
+      html += `
+        <div class="code-wrap">
+          <div class="code-head">
+            <span>${escapeHTML(language)}</span>
+            <button
+              class="copy"
+              onclick="copyCode(this)"
+            >
+              Copy
+            </button>
+          </div>
+
+          <pre>${escapeHTML(code)}</pre>
+        </div>
+      `;
+
+    }else{
+
+      html +=
+        escapeHTML(parts[i]);
+    }
+  }
+
+  return html;
+}
+
+async function copyCode(button){
+
+  const code =
+    button
+      .closest(".code-wrap")
+      .querySelector("pre")
+      .innerText;
+
+  await navigator.clipboard.writeText(code);
+
+  button.textContent =
+    "Copied!";
+
+  setTimeout(
+    () => {
+      button.textContent =
+        "Copy";
+    },
+    1200
+  );
+}
+
+window.copyCode =
+  copyCode;
+
+/* =========================
+   RENDER
+========================= */
+
+function renderMessages(){
+
+  const chat =
+    getCurrentChat();
+
+  messagesEl.innerHTML = "";
+
+  if(
+    !chat ||
+    !chat.messages.length
+  ){
+
+    messagesEl.innerHTML = `
+      <div class="empty">
+        <h1>How can I help?</h1>
+        <p>Ask Nova AI anything.</p>
+      </div>
+    `;
+
+    return;
+  }
+
+  chat.messages.forEach(message => {
+
+    const wrapper =
+      document.createElement("div");
+
+    wrapper.className =
+      "message " +
+      (
+        message.role === "user"
+        ? "user"
+        : "assistant"
+      );
+
+    const role =
+      document.createElement("div");
+
+    role.className =
+      "role";
+
+    role.textContent =
+      message.role === "user"
+      ? "You"
+      : "Nova AI";
+
+    const content =
+      document.createElement("div");
+
+    content.className =
+      "content";
+
+    content.innerHTML =
+      renderContent(
+        message.content
+      );
+
+    wrapper.appendChild(role);
+    wrapper.appendChild(content);
+
+    messagesEl.appendChild(wrapper);
+  });
+
+  messagesEl.scrollTop =
+    messagesEl.scrollHeight;
+}
+
+/* =========================
+   INSTANT ANSWERS
+========================= */
+
+function localResponse(text){
+
+  const t =
+    text
+      .trim()
+      .toLowerCase();
+
+  if(
+    /^(hi|hello|hey|yo|hiya|sup)[!. ]*$/.test(t)
+  ){
+    return "Hello! 👋 How can I help you?";
+  }
+
+  if(
+    t === "how are you" ||
+    t === "how are you?"
+  ){
+    return "I'm doing great! 🚀 What do you want to work on?";
+  }
+
+  if(
+    t === "who are you" ||
+    t === "what are you"
+  ){
+    return "I'm Nova AI, your AI assistant.";
+  }
+
+  return null;
+}
+
+/* =========================
+   MATH
+========================= */
+
+function calculateMath(text){
+
+  const cleaned =
+    text
+      .trim()
+      .replace(/,/g,"");
+
+  if(
+    !/^[0-9+\-*/().%^ \t]+$/.test(
+      cleaned
+    )
+  ){
+    return null;
+  }
+
+  if(
+    !/[+\-*/%^]/.test(cleaned)
+  ){
+    return null;
+  }
+
+  try{
+
+    const expression =
+      cleaned.replace(
+        /\^/g,
+        "**"
+      );
+
+    const result =
+      Function(
+        '"use strict";return(' +
+        expression +
+        ')'
+      )();
+
+    if(
+      typeof result === "number" &&
+      Number.isFinite(result)
+    ){
+      return String(result);
+    }
+
+  }catch{}
+
+  return null;
+}
+
+/* =========================
+   SEND
+========================= */
+
+async function sendMessage(){
+
+  if(busy) return;
+
+  const text = inputEl.value.trim();
+
+  if(!text && !pendingFiles.length) return;
+
+  const chat = getCurrentChat();
+
+  if(!chat) return;
+
+  const files = [...pendingFiles];
+
+  const attachments = [];
+
+  for(const file of files){
+
+    if(file.type.startsWith("image/")){
+
+      const dataUrl = await new Promise((resolve, reject) => {
+
+        const reader = new FileReader();
+
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+
+        reader.readAsDataURL(file);
+      });
+
+      attachments.push({
+        type:"image",
+        name:file.name,
+        mime:file.type,
+        data:dataUrl
+      });
+
+    }else{
+
+      const content = await file.text();
+
+      attachments.push({
+        type:"file",
+        name:file.name,
+        mime:file.type || "text/plain",
+        content:content.slice(0,100000)
+      });
+    }
+  }
+
+  const displayText =
+    text ||
+    (attachments.length
+      ? "Attached " + attachments.map(a => a.name).join(", ")
+      : "");
+
+  chat.messages.push({
+    role:"user",
+    content:displayText,
+    attachments:attachments
+  });
+
+  if(chat.title === "New chat"){
+    chat.title =
+      displayText.slice(0,35) +
+      (displayText.length > 35 ? "…" : "");
+  }
+
+  inputEl.value = "";
+  inputEl.style.height = "auto";
+
+  pendingFiles = [];
+  fileInput.value = "";
+
+  saveChats();
+  renderChatList();
+  renderMessages();
+
+  const instant =
+    !attachments.length
+      ? localResponse(text)
+      : null;
+
+  if(instant){
+
+    chat.messages.push({
+      role:"assistant",
+      content:instant
+    });
+
+    saveChats();
+    renderMessages();
+
+    return;
+  }
+
+  const math =
+    !attachments.length
+      ? calculateMath(text)
+      : null;
+
+  if(math !== null){
+
+    chat.messages.push({
+      role:"assistant",
+      content:math
+    });
+
+    saveChats();
+    renderMessages();
+
+    return;
+  }
+
+  busy = true;
+  sendEl.disabled = true;
+  statusEl.textContent = "Nova AI is thinking…";
+
+  const assistant = {
+    role:"assistant",
+    content:""
+  };
+
+  chat.messages.push(assistant);
+  renderMessages();
+
+  try{
+
+    const apiMessages = chat.messages
+      .slice(0,-1)
+      .map(m => {
+
+        if(!m.attachments?.length){
+          return {
+            role:m.role,
+            content:m.content
+          };
+        }
+
+        const parts = [];
+
+        if(m.content){
+          parts.push({
+            type:"text",
+            text:m.content
+          });
+        }
+
+        for(const attachment of m.attachments){
+
+          if(attachment.type === "image"){
+
+            parts.push({
+              type:"image_url",
+              image_url:{
+                url:attachment.data
+              }
+            });
+
+          }else if(attachment.type === "file"){
+
+            parts.push({
+              type:"text",
+              text:
+                "\n\n[File: " +
+                attachment.name +
+                "]\n" +
+                attachment.content
+            });
+          }
+        }
+
+        return {
+          role:m.role,
+          content:parts
+        };
+      });
+
+    const response = await fetch("/api/chat", {
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json"
+      },
+      body:JSON.stringify({
+        messages:apiMessages
+      })
+    });
+
+    const data = await response.json();
+
+    if(!response.ok){
+      throw new Error(
+        data.error || `Server error ${response.status}`
+      );
+    }
+
+    if(!data.answer){
+      throw new Error(
+        "The AI returned an empty response."
+      );
+    }
+
+    assistant.content = data.answer;
+
+    renderMessages();
+    saveChats();
+    renderChatList();
+
+    statusEl.textContent = "Nova AI";
+
+  }catch(error){
+
+    console.error("Nova AI error:", error);
+
+    assistant.content =
+      "⚠️ " + error.message;
+
+    renderMessages();
+
+    statusEl.textContent =
+      "Connection error";
+
+  }finally{
+
+    busy = false;
+    sendEl.disabled = false;
+    inputEl.focus();
+
+  }
+}
+
+sendEl.onclick =
+  sendMessage;
+
+inputEl.addEventListener(
+  "keydown",
+  event => {
+
+    if(
+      event.key === "Enter" &&
+      !event.shiftKey
+    ){
+
+      event.preventDefault();
+
+      sendMessage();
+    }
+  }
+);
+
+inputEl.addEventListener(
+  "input",
+  () => {
+
+    inputEl.style.height =
+      "auto";
+
+    inputEl.style.height =
+      Math.min(
+        inputEl.scrollHeight,
+        180
+      ) + "px";
+  }
+);
+
+mobileMenuEl.onclick =
+  () => {
+
+    sidebarEl.classList.toggle(
+      "open"
+    );
+  };
+
+/* =========================
+   START
+========================= */
+
+if(!chats.length){
+
+  createChat();
+
+}else{
+
+  currentChatId =
+    chats[0].id;
+
+  renderChatList();
+  renderMessages();
+}
+
+inputEl.focus();
+
+</script>
+
+</body>
+</html>
+```
+
+Then save:
+
+```text
+Ctrl + O
+Enter
+Ctrl + X
+```
+
+Then start the server:
+
+```bash
+node server.js
+```
+
+Open:
+
+```text
+http://localhost:3000
+```
+
+**One important thing:** this fixes the website appearance, but the `401 API key is invalid` is a **server/API-key issue**, not an HTML issue. Your `hi` works because that response is handled locally; `how` goes to Abliteration and gets rejected.
